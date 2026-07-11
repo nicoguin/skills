@@ -50,6 +50,17 @@ désobfusquable par n'importe qui.
 
 **FAIBLE** : `Referrer-Policy` absente, sourcemaps de prod publiées, verbosité d'erreurs front.
 
+## Règle de composition (un empilement de MOYEN peut faire un ÉLEVÉ)
+
+La sévérité ne se lit pas finding par finding isolément : certains **se composent**. Cas typique et
+important : **token de session lisible par JS** (cookie `httpOnly:false` ou localStorage) **+ absence
+de CSP** **+ surface JS tierce first-party** (GTM, trackers same-origin). Pris séparément ce sont des
+MOYEN ; ensemble, ils constituent une **capacité d'exfiltration de session active aujourd'hui** — un
+tag tiers compromis/dérivé (ou une XSS) lit le token, sans autre condition → **ÉLEVÉ**. Ne pas
+sous-titrer ce cas « conditionnel à une XSS » : le JS first-party (GTM) est déjà un vecteur d'exécution.
+Ne pas monter en CRITIQUE tant qu'il faut un tag malveillant/une XSS (pas un attaquant distant anonyme)
+et que l'API n'accepte pas les credentials cross-origin.
+
 ## Confirmer (ne pas juste flag)
 
 - Pour un XSS : remonter la chaîne complète source → sink. S'il y a un échappement du framework

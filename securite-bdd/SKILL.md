@@ -53,6 +53,27 @@ sur un compte read-only limité est gênante ; la même sur un compte `superuser
 **FAIBLE** : index/vues exposant plus que nécessaire, absence de politique de rotation de mots
 de passe de service.
 
+## Observable sans accès au code source (boîte noire)
+
+Ne pas conclure trop vite « nécessite le repo ». Sur un front/API sans source, 4 signaux BDD sont
+vérifiables et méritent d'être testés avant de classer la lentille non applicable :
+
+1. **Credential BDD dans le client** : chaîne de connexion (`postgres://user:pass@`, `mongodb+srv://`)
+   ou `password=` dans le bundle JS / le HTML sérialisé / un `.env` servi (tester `/.env` → doit être 404).
+2. **Erreurs SQL réfléchies** : messages `SQLSTATE`, `pg_`, `ORA-`, stacktrace ORM renvoyés au client
+   sur input malformé → fuite de schéma (ne PAS injecter en prod ; observer les réponses existantes).
+3. **Sur-retour de colonnes / PII** dans les réponses JSON de l'API (email, hash, IBAN, champs internes
+   `is_admin`) → le back renvoie plus que nécessaire.
+4. **Paramètres d'ordering/filtre exposés** (`?sort=`, `?orderBy=`) : piste d'un `ORDER BY` dynamique
+   non paramétrable (souvent le seul vecteur d'injection résiduel avec un ORM).
+
+## Injection NoSQL / JSONB (pas seulement SQL)
+
+Si la couche est MongoDB ou du JSONB Postgres : chercher l'injection d'**opérateurs** (`$ne`, `$gt`,
+`$where`, `$regex` → DoS), l'injection d'**objet JSON** (un body `{"user":{"$ne":null}}` contournant un
+filtre d'égalité), et les requêtes construites par concaténation dans une clause JSONB. Un ORM/ODM qui
+caste et type les entrées protège ; un `find(req.body)` brut ne protège pas.
+
 ## Confirmer
 
 - Injection : vérifier que le driver **ne** paramètre **pas** (concaténation réelle). Un

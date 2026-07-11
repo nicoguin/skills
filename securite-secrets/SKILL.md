@@ -69,4 +69,18 @@ correction n'est jamais « supprimer la ligne » mais **rotation immédiate + pu
 - Hash (non réversible) confondu avec un secret.
 - Chaîne haute-entropie qui est en fait un hash de build / checksum.
 
+## En boîte noire (bundle client, sans accès repo)
+
+Quand il n'y a pas de repo (audit d'un front en prod), la chasse aux secrets se fait dans le
+**bundle JS et le state sérialisé** :
+- Scanner tous les chunks `/_nuxt/`, `*.js` et le `window.__NUXT__`/`__NEXT_DATA__` avec les patterns
+  de clés ci-dessus.
+- Vérifier qu'aucun **`privateRuntimeConfig`** (Nuxt) / secret serveur ne fuit dans le state : seul le
+  `publicRuntimeConfig` doit être présent côté client. Un token de session (`eyJ…`) sérialisé serait grave.
+- **Clé publique navigateur ≠ secret** : les clés client destinées au front (Google `AIza…` Maps/Analytics,
+  Stripe `pk_`, Adyen `live_` *client key*) sont publiques par conception. Le finding n'est **pas** « secret
+  exposé » mais « **clé à restreindre par origine/référent** » côté dashboard (risque abus/coût) → sévérité
+  FAIBLE, et relève plutôt de `securite-front`/`securite-infra`. Ne pas les classer comme fuite de secret.
+- Sourcemaps : tester `<bundle>.js.map` — si servi, tout le code source fuit (chercher secrets dedans).
+
 Reporter au format `securite-it`, avec le secret **masqué** et la rotation traitée hors-bande.

@@ -54,6 +54,20 @@ faire quoi*, ensuite *ce qui est injectable*.
 
 **FAIBLE** : en-têtes de sécurité manquants côté API, logs trop verbeux.
 
+## Grille de lecture CORS (la config est posée côté serveur = lentille back)
+
+Le point qui fait le plus errer : refléter une origine n'est grave **que** combiné aux credentials.
+
+| Situation | Sévérité | Pourquoi |
+|---|---|---|
+| Reflet d'origine arbitraire **+ `Access-Control-Allow-Credentials: true`** | ÉLEVÉ/CRITIQUE | N'importe quel site lit les réponses authentifiées par cookie → rejeu de session cross-origin |
+| Reflet d'origine **sans** credentials, auth par **Bearer token** (header, non auto-envoyé) | FAIBLE/MOYEN | Un site tiers ne possède pas le token → pas d'exfiltration directe ; reste une mauvaise pratique + bombe à retardement |
+| Origine en **allowlist explicite** | non-finding | Comportement attendu |
+
+- Vérifier systématiquement la **présence de `Allow-Credentials: true`** avant de classer : c'est le facteur décisif.
+- `Access-Control-Allow-Origin: *` **avec** credentials est rejeté par les navigateurs → chercher plutôt le **reflet** dynamique de l'`Origin` (`Vary: Origin`), qui contourne la restriction du wildcard.
+- Remédiation type : allowlist explicite des domaines légitimes, jamais le reflet.
+
 ## Confirmer
 
 - IDOR : montrer qu'aucun `WHERE owner_id = current_user` / check d'appartenance n'existe entre
