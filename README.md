@@ -14,6 +14,7 @@ Copier le dossier d'une skill dans `~/.claude/skills/` (Windows : `C:\Users\<use
 | [`cto`](cto/SKILL.md) | CTO virtuel : build vs buy, challenge d'équipe tech/presta, archi, dette technique, sécurité, coûts, IA |
 | [`data-engineer`](data-engineer/SKILL.md) | Data engineer senior : SQL fiable (Postgres/BigQuery), modélisation, pipelines, qualité de données, métriques |
 | [`head-of-operations`](head-of-operations/SKILL.md) | Head of Ops e-commerce : logistique, transporteurs, retours/non-retrait, SAV, stocks, amélioration continue |
+| [`salaire-evaluation`](salaire-evaluation/SKILL.md) | Évaluation de rému (cadre → CEO) : périmètre, taille, secteur, filiale vs indépendant, méthode hybride marché/P&L, sourcing daté |
 
 ## Suite sécurité IT (audit défensif)
 
